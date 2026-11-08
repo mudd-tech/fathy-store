@@ -108,6 +108,7 @@ footer{padding:34px 0 130px;text-align:center;color:var(--mut);font-size:13.5px}
 .fx.or{--c:#F2A154}
 .fx.fb{--c:#6AA3F5}
 .fx.ig{--c:#EC6A94}
+.fx.gd{--c:#E3C56E}
 @media(prefers-reduced-motion:reduce){.fx,.fx:hover{transform:none}}
 </style>
 </head>
@@ -122,6 +123,7 @@ footer{padding:34px 0 130px;text-align:center;color:var(--mut);font-size:13.5px}
   <symbol id="i-bolt" viewBox="0 0 24 24"><path fill="currentColor" d="M13 2L4 14h6l-1 8 9-12h-6z"/></symbol>
   <symbol id="i-cp" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6a2 2 0 012-2h9"/></g></symbol>
   <symbol id="i-chip" viewBox="0 0 40 30"><rect width="40" height="30" rx="6" fill="url(#gc)"/><path d="M0 10h40M0 20h40M14 0v30M26 0v30" stroke="#8A6B1C" stroke-width="1" opacity=".5" fill="none"/></symbol>
+  <symbol id="i-add" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="9.5" cy="8" r="3.6"/><path d="M3 20c.6-3.6 3.2-5.5 6.5-5.5S15.4 16.4 16 20M19 7v6M16 10h6"/></g></symbol>
 </svg>
 
 <header class="hero"><div class="w">
@@ -158,6 +160,7 @@ footer{padding:34px 0 130px;text-align:center;color:var(--mut);font-size:13.5px}
     <a class="fx or rev" id="loc" href="#" target="_blank" rel="noopener" hidden><span class="ico"><svg><use href="#i-pin"/></svg></span><span class="tx"><b>موقعنا</b><em>Google Maps</em></span></a>
     <a class="fx fb rev" id="fb" href="#" target="_blank" rel="noopener"><span class="ico"><svg><use href="#i-fb"/></svg></span><span class="tx"><b>فيسبوك</b><em>Facebook</em></span></a>
     <a class="fx ig rev" id="ig" href="#" target="_blank" rel="noopener"><span class="ico"><svg><use href="#i-ig"/></svg></span><span class="tx"><b>إنستجرام</b><em>@fathy._store</em></span></a>
+    <a class="fx gd wide rev" id="saveC" href="#" role="button"><span class="ico"><svg><use href="#i-add"/></svg></span><span class="tx"><b>حفظ جهة الاتصال</b><em>Save contact</em></span><span class="arr" aria-hidden="true">↓</span></a>
   </div>
   <div class="rvc rev" id="review" hidden><div class="stars" aria-hidden="true">★★★★★</div><b>رأيك يهمنا</b><p>قيّم تجربتك معنا على جوجل، تقييمك بيساعد غيرك ويدعمنا نكمّل.</p><a class="btn b-g" id="rv" href="#" target="_blank" rel="noopener">قيّمنا على جوجل</a></div>
 
@@ -206,6 +209,21 @@ if("IntersectionObserver" in window){
   var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}})},{threshold:.1});
   els.forEach(function(e,i){e.style.transitionDelay=(i%4)*70+"ms";io.observe(e)});
 }else els.forEach(function(e){e.classList.add("in")});
+/* ===== حفظ جهة الاتصال (vCard) ===== */
+function fold(l){var o="",f=true;while(l.length>(f?75:74)){var n=f?75:74;o+=l.slice(0,n)+"\r\n ";l=l.slice(n);f=false}return o+l}
+function photoB64(){try{var im=document.querySelector(".stage img"),c=document.createElement("canvas");c.width=c.height=256;var x=c.getContext("2d");x.fillStyle="#0A1B52";x.fillRect(0,0,256,256);var r=Math.min(220/im.naturalWidth,220/im.naturalHeight),w=im.naturalWidth*r,h=im.naturalHeight*r;x.drawImage(im,(256-w)/2,(256-h)/2,w,h);return c.toDataURL("image/jpeg",.88).split(",")[1]}catch(e){return ""}}
+function buildVcf(){
+  var L=["BEGIN:VCARD","VERSION:3.0","FN:Fathy Store","N:;Fathy Store;;;","NICKNAME:فتحي ستور","ORG:Fathy Store","TITLE:Mobile Services","TEL;TYPE=CELL,VOICE,pref:+"+CFG.whatsapp,"URL:"+location.href.split("#")[0],"URL:"+CFG.facebook,"URL:"+CFG.instagram];
+  if(CFG.location)L.push("URL:"+CFG.location);
+  L.push("NOTE:Fathy Store - Mobile Services");
+  var p=photoB64();if(p)L.push(fold("PHOTO;ENCODING=b;TYPE=JPEG:"+p));
+  L.push("END:VCARD");return L.join("\r\n")+"\r\n";
+}
+$("saveC").onclick=function(e){
+  e.preventDefault();var v=buildVcf();
+  try{var b=new Blob([v],{type:"text/vcard;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="fathy-store.vcf";document.body.appendChild(a);a.click();a.remove();toast("جاري حفظ جهة الاتصال")}
+  catch(err){location.href="data:text/vcard;charset=utf-8,"+encodeURIComponent(v)}
+};
 </script>
 </body>
 </html>
